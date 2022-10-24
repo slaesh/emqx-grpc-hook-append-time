@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  emqx_broker:
+    image: emqx/emqx:5.0.8
+    environment:
+      # random cookie seed
+      - EMQX_NODE__COOKIE=rnd-cookie-seed
+
+      # dashboard login
+      - EMQX_DASHBOARD__DEFAULT_USERNAME=${EMQX_DASHBOARD__DEFAULT_USERNAME:-admin}
+      - EMQX_DASHBOARD__DEFAULT_PASSWORD=${EMQX_DASHBOARD__DEFAULT_PASSWORD:-changeme}
+
+    ports:
+      - 1883:1883 # mqtt
+      - 9001:8083 # websocket
+      - 18083:18083 # dashboard (http)
+
+  emqx_grpc_hook_append_time:
+    build: .
+    environment:
+      - GRPC_PORT=9531
