@@ -11,6 +11,18 @@ services:
       - EMQX_DASHBOARD__DEFAULT_USERNAME=${EMQX_DASHBOARD__DEFAULT_USERNAME:-admin}
       - EMQX_DASHBOARD__DEFAULT_PASSWORD=${EMQX_DASHBOARD__DEFAULT_PASSWORD:-changeme}
 
+      # hook servers
+      - EMQX_EXHOOK__SERVERS=emqx_grpc_hook_append_time
+
+      # hook server config, index starts with 1?
+      - EMQX_EXHOOK__SERVERS__1__NAME=emqx_grpc_hook_append_time
+      - EMQX_EXHOOK__SERVERS__1__ENABLE=true
+      - EMQX_EXHOOK__SERVERS__1__URL=http://emqx_grpc_hook_append_time:${GRPC_PORT:-9531}
+      - EMQX_EXHOOK__SERVERS__1__AUTO_RECONNECT=10s
+
+      # disable authorization, so subscribe to "#" works..
+      - EMQX_AUTHORIZATION__SOURCES__1__ENABLE=false
+
     ports:
       - 1883:1883 # mqtt
       - 9001:8083 # websocket
@@ -19,4 +31,4 @@ services:
   emqx_grpc_hook_append_time:
     build: .
     environment:
-      - GRPC_PORT=9531
+      - GRPC_PORT=${GRPC_PORT:-9531}
