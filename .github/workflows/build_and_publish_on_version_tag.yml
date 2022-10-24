@@ -1,0 +1,52 @@
+name: build+publish on version tag
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v2
+
+      - name: setup QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          platforms: all
+
+      - name: install buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          install: true
+
+      - name: available platforms
+        run: echo ${{ steps.buildx.outputs.platforms }}
+
+      - name: login to docker hub
+        run: echo "${{ secrets.DOCKER_ACCESS_TOKEN }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: build and publish the image
+        run: |
+          docker buildx build \
+            --push \
+            --tag slaesh/emqx_grpc_hook_append_time:latest \
+            --tag slaesh/emqx_grpc_hook_append_time:${{ github.ref_name }} \
+            --platform linux/amd64,linux/arm/v7,linux/arm64 \
+            .
+
+      - name: create release
+        uses: ncipollo/release-action@v1
+        with:
+          # comma seperated list of files, supports wildcards (*.txt) too
+          # artifacts: ""
+          body: |
+            # ${{ github.ref_name }}
+            changes may appear here.. :)
+          # token: ${{ secrets.ACCESS_TOKEN }} # github access-token? defaults to a valid one? Oo
+
+# EOF
