@@ -1,8 +1,7 @@
-FROM golang:1.19 AS BUILDER
+FROM golang:1.19-alpine AS BUILDER
 
 # install build deps
-RUN apt-get update
-RUN apt-get install -y protobuf-compiler
+RUN apk update && apk add --no-cache make protobuf-dev
 RUN export GO111MODULE=on
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
